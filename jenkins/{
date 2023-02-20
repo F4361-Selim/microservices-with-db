@@ -1,167 +1,0 @@
-Script started on 2023-02-20 07:28:06+0000
-                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-admin-server/target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-                    env.IMAGE_TAG_ADMIN_SERVER="${ECR_REGISTRY}/${APP_REPO_NAME}:admin-server-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-api-gateway/target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-                    env.IMAGE_TAG_API_GATEWAY="${ECR_REGISTRY}/${APP_REPO_NAME}:api-gateway-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-config-server/target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-                    env.IMAGE_TAG_CONFIG_SERVER="${ECR_REGISTRY}/${APP_REPO_NAME}:config-server-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-customers-service/target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-                    env.IMAGE_TAG_CUSTOMERS_SERVICE="${ECR_REGISTRY}/${APP_REPO_NAME}:customers-service-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-discovery-server/target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-                    env.IMAGE_TAG_DISCOVERY_SERVER="${ECR_REGISTRY}/${APP_REPO_NAME}:discovery-server-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-hystrix-dashboard/target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-                    env.IMAGE_TAG_HYSTRIX_DASHBOARD="${ECR_REGISTRY}/${APP_REPO_NAME}:hystrix-dashboard-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-vets-service/target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-                    env.IMAGE_TAG_VETS_SERVICE="${ECR_REGISTRY}/${APP_REPO_NAME}:vets-service-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-visits-service/target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-                    env.IMAGE_TAG_VISITS_SERVICE="${ECR_REGISTRY}/${APP_REPO_NAME}:visits-service-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-                    env.IMAGE_TAG_GRAFANA_SERVICE="${ECR_REGISTRY}/${APP_REPO_NAME}:grafana-service"
-                    env.IMAGE_TAG_PROMETHEUS_SERVICE="${ECR_REGISTRY}/${APP_REPO_NAME}:prometheus-service"
-                }
-            }
-        }
-        stage('Build App Staging Docker Images') {
-            steps {
-                echo 'Building App Staging Images'
-                sh ". ./jenkins/build-staging-docker-images-for-ecr.sh"
-                sh 'docker image ls'
-            }
-        }
-        stage('Push Images to ECR Repo') {
-            steps {
-                echo "Pushing ${APP_NAME} App Images to ECR Repo"
-                sh ". ./jenkins/push-staging-docker-images-to-ecr.sh"
-            }
-        }
-        stage('Deploy App on Petclinic Kubernetes Cluster'){
-            steps {
-                echo 'Deploying App on K8s Cluster'
-                sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW"
-                sh "envsubst < k8s/petclinic_chart/values-template.yaml > k8s/petclinic_chart/values.yaml"
-                sh "sed -i s/HELM_VERSION/${BUILD_NUMBER}/ k8s/petclinic_chart/Chart.yaml"
-                sh "rancher kubectl delete secret regcred -n petclinic-staging-ns || true"
-                sh """
-                rancher kubectl create secret generic regcred -n petclinic-staging-ns \
-                --from-file=.dockerconfigjson=$JENKINS_HOME/.docker/config.json \
-                --type=kubernetes.io/dockerconfigjson
-                """
-                sh "rm -f k8s/config"
-                sh "ran]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[?1034h[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-admin-server/t arget/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-bash: syntax error near unexpected token `('
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    env.IMAGE_TAG_ADMIN_SERVER="${ECR_REGISTRY}/${APP_REPO_NAME}:admin-se rver-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-bash: env.IMAGE_TAG_ADMIN_SERVER=/:admin-server-staging-v-b: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-api-gateway/ta rget/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-bash: syntax error near unexpected token `('
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    env.IMAGE_TAG_API_GATEWAY="${ECR_REGISTRY}/${APP_REPO_NAME}:api-gatew ay-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-bash: env.IMAGE_TAG_API_GATEWAY=/:api-gateway-staging-v-b: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-config-server/ target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-bash: syntax error near unexpected token `('
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    env.IMAGE_TAG_CONFIG_SERVER="${ECR_REGISTRY}/${APP_REPO_NAME}:config- server-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-bash: env.IMAGE_TAG_CONFIG_SERVER=/:config-server-staging-v-b: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-customers-serv ice/target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-bash: syntax error near unexpected token `('
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    env.IMAGE_TAG_CUSTOMERS_SERVICE="${ECR_REGISTRY}/${APP_REPO_NAME}:cus tomers-service-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-bash: env.IMAGE_TAG_CUSTOMERS_SERVICE=/:customers-service-staging-v-b: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-discovery-serv er/target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-bash: syntax error near unexpected token `('
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    env.IMAGE_TAG_DISCOVERY_SERVER="${ECR_REGISTRY}/${APP_REPO_NAME}:disc overy-server-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-bash: env.IMAGE_TAG_DISCOVERY_SERVER=/:discovery-server-staging-v-b: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-hystrix-dashbo ard/target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-bash: syntax error near unexpected token `('
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    env.IMAGE_TAG_HYSTRIX_DASHBOARD="${ECR_REGISTRY}/${APP_REPO_NAME}:hys trix-dashboard-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-bash: env.IMAGE_TAG_HYSTRIX_DASHBOARD=/:hystrix-dashboard-staging-v-b: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-vets-service/t arget/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-bash: syntax error near unexpected token `('
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    env.IMAGE_TAG_VETS_SERVICE="${ECR_REGISTRY}/${APP_REPO_NAME}:vets-ser vice-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-bash: env.IMAGE_TAG_VETS_SERVICE=/:vets-service-staging-v-b: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    MVN_VERSION=sh(script:'. ${WORKSPACE}/spring-petclinic-visits-service /target/maven-archiver/pom.properties && echo $version', returnStdout:true).trim()
-bash: syntax error near unexpected token `('
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    env.IMAGE_TAG_VISITS_SERVICE="${ECR_REGISTRY}/${APP_REPO_NAME}:visits -service-staging-v${MVN_VERSION}-b${BUILD_NUMBER}"
-bash: env.IMAGE_TAG_VISITS_SERVICE=/:visits-service-staging-v-b: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    env.IMAGE_TAG_GRAFANA_SERVICE="${ECR_REGISTRY}/${APP_REPO_NAME}:grafa na-service"
-bash: env.IMAGE_TAG_GRAFANA_SERVICE=/:grafana-service: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                    env.IMAGE_TAG_PROMETHEUS_SERVICE="${ECR_REGISTRY}/${APP_REPO_NAME}:pr ometheus-service"
-bash: env.IMAGE_TAG_PROMETHEUS_SERVICE=/:prometheus-service: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                }
-bash: syntax error near unexpected token `}'
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m            }
-bash: syntax error near unexpected token `}'
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m        }
-bash: syntax error near unexpected token `}'
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m        stage('Build App Staging Docker Images') {
-bash: syntax error near unexpected token `'Build App Staging Docker Images''
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m            steps {
-bash: steps: command not found
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                echo 'Building App Staging Images'
-Building App Staging Images
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh ". ./jenkins/build-staging-docker-images-for-ecr.sh"
-sh: . ./jenkins/build-staging-docker-images-for-ecr.sh: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh 'docker image ls'
-sh: docker image ls: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m            }
-bash: syntax error near unexpected token `}'
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m        }
-bash: syntax error near unexpected token `}'
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m        stage('Push Images to ECR Repo') {
-bash: syntax error near unexpected token `'Push Images to ECR Repo''
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m            steps {
-bash: steps: command not found
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                echo "Pushing ${APP_NAME} App Images to ECR Repo"
-Pushing  App Images to ECR Repo
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh ". ./jenkins/push-staging-docker-images-to-ecr.sh"
-sh: . ./jenkins/push-staging-docker-images-to-ecr.sh: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m            }
-bash: syntax error near unexpected token `}'
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m        }
-bash: syntax error near unexpected token `}'
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m        stage('Deploy App on Petclinic Kubernetes Cluster'){
-bash: syntax error near unexpected token `'Deploy App on Petclinic Kubernetes Cluster''
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m            steps {
-bash: steps: command not found
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                echo 'Deploying App on K8s Cluster'
-Deploying App on K8s Cluster
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHE R_CREDS_USR:$RANCHER_CREDS_PSW"
-sh: rancher login  --context  --token :: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "envsubst < k8s/petclinic_chart/values-template.yaml > k8s/petclinic_c hart/values.yaml"
-sh: envsubst < k8s/petclinic_chart/values-template.yaml > k8s/petclinic_chart/values.yaml: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "sed -i s/HELM_VERSION/${BUILD_NUMBER}/ k8s/petclinic_chart/Chart.yaml "
-sh: sed -i s/HELM_VERSION// k8s/petclinic_chart/Chart.yaml: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "rancher kubectl delete secret regcred -n petclinic-staging-ns || true "
-sh: rancher kubectl delete secret regcred -n petclinic-staging-ns || true: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh """
->                 rancher kubectl create secret generic regcred -n petclinic-staging-ns \
->                 --from-file=.dockerconfigjson=$JENKINS_HOME/.docker/config.json \
->                 --type=kubernetes.io/dockerconfigjson
->                 """
-sh: 
-                rancher kubectl create secret generic regcred -n petclinic-staging-ns                 --from-file=.dockerconfigjson=/.docker/config.json                 --type=kubernetes.io/dockerconfigjson
-                : No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "rm -f k8s/config"
-sh: rm -f k8s/config: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "rancher cluster kf $CLUSTERID > k8s/config"
-sh: rancher cluster kf  > k8s/config: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "chmod 400 k8s/config"
-sh: chmod 400 k8s/config: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "helm repo add stable-petclinic s3://petclinic-helm-charts-<put-your-n ame>/stable/myapp/"
-sh: helm repo add stable-petclinic s3://petclinic-helm-charts-<put-your-name>/stable/myapp/: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "helm package k8s/petclinic_chart"
-sh: helm package k8s/petclinic_chart: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "helm s3 push --force petclinic_chart-${BUILD_NUMBER}.tgz stable-petcl inic"
-sh: helm s3 push --force petclinic_chart-.tgz stable-petclinic: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "helm repo update"
-sh: helm repo update: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m                sh "AWS_REGION=$AWS_REGION helm upgrade --install petclinic-app-release s table-petclinic/petclinic_chart --version ${BUILD_NUMBER} --namespace petclinic-staging-ns --kubeconfig k8s/config"
-sh: AWS_REGION= helm upgrade --install petclinic-app-release stable-petclinic/petclinic_chart --version  --namespace petclinic-staging-ns --kubeconfig k8s/config: No such file or directory
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m            }
-bash: syntax error near unexpected token `}'
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m        }
-bash: syntax error near unexpected token `}'
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m    }
-bash: syntax error near unexpected token `}'
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m    post {
-bash: post: command not found
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m        always {
-bash: always: command not found
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m            echo 'Deleting all local images'
-Deleting all local images
-]0;ec2-user@jenkins-server:~/microservices-with-db/jenkins[1;31mec2-user[33m@jenkins-server# jenkins:[32m[1;36m (release)$[00m            sh 'docker image
